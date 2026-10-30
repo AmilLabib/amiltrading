@@ -1,0 +1,152 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --paper: #f6f1e7;
+  --card: #fffcf5;
+  --sunken: #efe8da;
+  --ink: #2a251f;
+  --ink-2: #5c5347;
+  --muted: #8a7f70;
+  --line: #e3dac8;
+  --rule: #e9e1d1;
+  --margin: #e6b4a6;
+  --marker: #f6e3a1;
+  --gain: #2a7fa8;
+  --loss: #c0582c;
+  --accent: #2a251f;
+  --accent-ink: #fffcf5;
+}
+
+.dark {
+  --paper: #1a1814;
+  --card: #221f1a;
+  --sunken: #2a2620;
+  --ink: #ece4d4;
+  --ink-2: #c4b9a6;
+  --muted: #968b79;
+  --line: #3a342b;
+  --rule: #2e2a23;
+  --margin: #6b3b2e;
+  --marker: #5a4a1c;
+  --gain: #4f97d1;
+  --loss: #d9773f;
+  --accent: #ece4d4;
+  --accent-ink: #1a1814;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-margin: var(--margin);
+  --color-marker: var(--marker);
+  --color-gain: var(--gain);
+  --color-loss: var(--loss);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-hand: 'Caveat', 'Segoe Print', cursive;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  /* faint paper grain */
+  background-image: radial-gradient(color-mix(in oklab, var(--ink) 4%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+::selection {
+  background: var(--marker);
+}
+
+@utility card {
+  @apply bg-card border border-line rounded-2xl shadow-[0_1px_0_var(--line),0_8px_24px_-18px_rgb(0_0_0/0.35)];
+}
+
+@utility input {
+  @apply w-full bg-card border border-line rounded-xl px-3.5 py-2.5 text-[15px] text-ink placeholder:text-muted outline-none transition focus:border-ink-2 focus:ring-4 focus:ring-marker/60;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+}
+@utility btn-primary {
+  @apply btn bg-accent text-accent-ink hover:opacity-90;
+}
+@utility btn-ghost {
+  @apply btn text-ink-2 hover:bg-sunken;
+}
+@utility btn-outline {
+  @apply btn border border-line text-ink hover:bg-sunken;
+}
+
+@utility label {
+  @apply block text-xs font-semibold uppercase tracking-[0.12em] text-muted mb-2;
+}
+
+@layer components {
+  /* notebook paper: ruled lines that follow the text */
+  .ruled {
+    line-height: 2rem;
+    background-image: linear-gradient(transparent calc(2rem - 1px), var(--rule) calc(2rem - 1px));
+    background-size: 100% 2rem;
+    background-attachment: local;
+  }
+
+  .prose-journal {
+    @apply font-serif text-[17px] leading-[1.75] text-ink;
+  }
+  .prose-journal p + p,
+  .prose-journal p + ul,
+  .prose-journal ul + p,
+  .prose-journal blockquote,
+  .prose-journal ol {
+    @apply mt-3;
+  }
+  .prose-journal ul {
+    @apply list-disc pl-6 mt-2;
+  }
+  .prose-journal ol {
+    @apply list-decimal pl-6;
+  }
+  .prose-journal blockquote {
+    @apply border-l-2 border-margin pl-4 italic text-ink-2;
+  }
+
+  .highlight {
+    background: linear-gradient(transparent 55%, var(--marker) 55%);
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fade-in {
+    animation: fade-in 0.35s ease-out both;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
