@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Link, useParams } from 'wouter'
 import { useEntries } from '../lib/store.jsx'
 import { fmtNumber, fmtRupiah } from '../lib/format.js'
-import { tradeValue } from '../lib/ledger.js'
+import { entryTickers, tradeValue } from '../lib/ledger.js'
 import EntryCard from '../components/EntryCard.jsx'
 import { Empty, Pnl, Spinner } from '../components/bits.jsx'
 import Icon from '../components/Icon.jsx'
@@ -11,10 +11,7 @@ export default function StockDetail() {
   const ticker = useParams().ticker.toUpperCase().replace(/[^A-Z0-9]/g, '')
   const { entries, loading, ledger } = useEntries()
 
-  const related = useMemo(
-    () => entries.filter((e) => e.trades.some((t) => t.ticker === ticker) || new RegExp(`\\$${ticker}\\b`, 'i').test(`${e.story} ${e.decision}`)),
-    [entries, ticker],
-  )
+  const related = useMemo(() => entries.filter((e) => entryTickers(e).has(ticker)), [entries, ticker])
   const p = ledger.positions[ticker]
 
   if (loading && !entries.length) return <Spinner />

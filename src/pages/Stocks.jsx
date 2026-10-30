@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Link } from 'wouter'
 import { useEntries } from '../lib/store.jsx'
 import { fmtNumber, timeAgo } from '../lib/format.js'
+import { entryTickers } from '../lib/ledger.js'
 import { Empty, Pnl, Spinner } from '../components/bits.jsx'
 
 export default function Stocks() {
@@ -10,21 +11,22 @@ export default function Stocks() {
   const stocks = useMemo(() => {
     const meta = {}
     for (const e of entries) {
-      for (const t of new Set(e.trades.map((t) => t.ticker))) {
-        const m = (meta[t] ||= { entries: 0, last: e.date })
+      for (const t of entryTickers(e)) {
+        const m = (meta[t] ||= { ticker: t, entries: 0, last: e.date })
         m.entries++
         if (e.date > m.last) m.last = e.date
       }
     }
-    return Object.values(ledger.positions)
-      .map((p) => ({ ...p, ...meta[p.ticker] }))
-      .sort((a, b) => (b.lots > 0) - (a.lots > 0) || b.last.localeCompare(a.last))
+    return Object.values(meta)
+      .map((m) => ({ ...m, ...ledger.positions[m.ticker] }))
+      .sort((a, b) => b.last.localeCompare(a.last))
   }, [entries, ledger])
 
   if (loading && !entries.length) return <Spinner />
 
   const holding = stocks.filter((s) => s.lots > 0)
-  const closed = stocks.filter((s) => s.lots === 0)
+  const closed = stocks.filter((s) => s.trades && !s.lots)
+  const watched = stocks.filter((s) => !s.trades)
 
   return (
     <div className="fade-in">
@@ -33,11 +35,14 @@ export default function Stocks() {
 
       {stocks.length === 0 ? (
         <div className="mt-8">
-          <Empty title="Belum ada saham">Tambahkan transaksi di catatanmu, nanti sahamnya muncul di sini.</Empty>
+          <Empty title="Belum ada saham">
+            Tambahkan transaksi, atau sebut sahamnya di cerita pakai <code>$KODE</code> (misal <code>$BBCA</code>), nanti muncul di sini.
+          </Empty>
         </div>
       ) : (
         <>
           {holding.length > 0 && <Group title="Masih dipegang" list={holding} />}
+          {watched.length > 0 && <Group title="Cuma dipantau" list={watched} />}
           {closed.length > 0 && <Group title="Sudah keluar" list={closed} />}
         </>
       )}
@@ -68,10 +73,12 @@ function Group({ title, list }) {
                 <>
                   <b className="text-ink">{fmtNumber(s.lots)} lot</b> · avg {fmtNumber(s.avg)}
                 </>
-              ) : (
+              ) : s.trades ? (
                 <span className="text-muted">
                   {s.closed} kali jual · {s.wins} untung
                 </span>
+              ) : (
+                <span className="text-muted italic">Disebut di cerita, belum pernah transaksi</span>
               )}
             </div>
           </Link>

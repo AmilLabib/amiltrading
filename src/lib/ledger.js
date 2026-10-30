@@ -36,3 +36,14 @@ export function buildLedger(entries) {
 }
 
 export const tradeValue = (t) => t.price * t.lots * LOT_SIZE
+
+// Same $TICKER syntax the Markdown renderer turns into links.
+const MENTION = /\$([A-Za-z]{2,6})\b/g
+
+// Every ticker an entry touches: traded ones plus $TICKER mentions anywhere in its text.
+export function entryTickers(entry) {
+  const set = new Set(entry.trades.map((t) => t.ticker))
+  const text = [entry.title, entry.story, entry.decision, ...entry.reviews.map((r) => r.text)].join(' ')
+  for (const [, t] of text.matchAll(MENTION)) set.add(t.toUpperCase())
+  return set
+}

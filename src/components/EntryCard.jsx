@@ -5,7 +5,7 @@ import { MoodChip, Pnl, TradePill } from './bits.jsx'
 import Icon from './Icon.jsx'
 
 const excerpt = (text, n = 220) => {
-  const plain = (text || '').replace(/[*=>#]|^\s*[-•]\s+/gm, '').replace(/\$([A-Za-z]{2,6})/g, '$1').replace(/\s+/g, ' ').trim()
+  const plain = (text || '').replace(/[*=>#]|^\s*[-•]\s+/gm, '').replace(/\$([A-Za-z]{2,6})/g, (_, t) => t.toUpperCase()).replace(/\s+/g, ' ').trim()
   return plain.length > n ? `${plain.slice(0, n).trimEnd()}…` : plain
 }
 

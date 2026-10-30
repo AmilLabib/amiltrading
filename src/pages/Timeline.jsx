@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'wouter'
 import { useEntries } from '../lib/store.jsx'
 import { fmtMonth, MOODS, timeAgo } from '../lib/format.js'
+import { entryTickers } from '../lib/ledger.js'
 import EntryCard from '../components/EntryCard.jsx'
 import { Empty, MoodChip, Pnl, Spinner } from '../components/bits.jsx'
 import Icon from '../components/Icon.jsx'
@@ -20,7 +21,7 @@ export default function Timeline() {
   const [mood, setMood] = useState(null)
   const [ticker, setTicker] = useState('')
 
-  const tickers = useMemo(() => Object.keys(ledger.positions).sort(), [ledger])
+  const tickers = useMemo(() => [...new Set(entries.flatMap((e) => [...entryTickers(e)]))].sort(), [entries])
   const totalPnl = useMemo(() => ledger.realized.reduce((s, r) => s + r.pnl, 0), [ledger])
 
   const filtered = useMemo(() => {
@@ -28,7 +29,7 @@ export default function Timeline() {
     return entries.filter(
       (e) =>
         (!mood || e.moods.includes(mood)) &&
-        (!ticker || e.trades.some((t) => t.ticker === ticker)) &&
+        (!ticker || entryTickers(e).has(ticker)) &&
         (!needle ||
           [e.title, e.story, e.decision, ...e.trades.map((t) => t.ticker), ...e.reviews.map((r) => r.text)]
             .join(' ')
